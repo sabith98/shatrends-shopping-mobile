@@ -1,12 +1,19 @@
 import React, {useState, useLayoutEffect} from 'react';
-import {View, StyleSheet, Text, TouchableOpacity} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
 import {TextInput, Button, useTheme} from 'react-native-paper';
 import {useForm, Controller} from 'react-hook-form';
 import * as yup from 'yup';
 import {yupResolver} from '@hookform/resolvers/yup';
 import {LoginScreenNavigationProp} from '../../navigation/types';
 
-// Type for form input data
 interface FormData {
   email: string;
   password: string;
@@ -17,7 +24,6 @@ export const SignInScreen: React.FC<{
 }> = ({navigation}) => {
   const {colors} = useTheme();
 
-  // Validation schema using yup
   const schema = yup.object().shape({
     email: yup
       .string()
@@ -29,247 +35,269 @@ export const SignInScreen: React.FC<{
       .required('Password is required'),
   });
 
-  // React Hook Form setup with yup validation
   const {
     control,
     handleSubmit,
-    formState: {errors},
+    formState: {errors, isSubmitting},
   } = useForm<FormData>({
     resolver: yupResolver(schema),
   });
 
-  // State for password visibility toggle
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
-  // Function to handle form submission
-  const onSubmit = (data: FormData) => {
-    console.log('Form Data:', data);
-    // TODO: Implement sign-in logic here
+  const onSubmit = async (data: FormData) => {
+    try {
+      // TODO: Implement sign-in logic here
+    } catch (error) {
+      console.error('Sign in error:', error);
+    }
   };
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, [navigation]);
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.logo}>Shatrends</Text>
-      <Text style={styles.title}>Let’s get started!</Text>
-      <Text style={styles.subtitle}>
-        Your style, your trends. Sign in to shop the latest fashion.
-      </Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
+        <View style={styles.headerContainer}>
+          <Text style={styles.logo}>Shatrends</Text>
+          <Text style={styles.title}>Welcome back</Text>
+          <Text style={styles.subtitle}>Sign in to continue shopping</Text>
+        </View>
 
-      {/* Email Label */}
-      <Text style={styles.inputLabel}>Email</Text>
-
-      {/* Email Field with validation */}
-      <Controller
-        name="email"
-        control={control}
-        render={({field: {onChange, onBlur, value}}) => (
-          <TextInput
-            mode="outlined"
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            style={styles.input}
-            left={<TextInput.Icon icon="email" color="#ADB2C3" />}
-            placeholder="Enter email"
-            placeholderTextColor="#A4AAB9"
-            theme={{
-              roundness: 15,
-              colors: {
-                primary: '#ADB2C3',
-              },
-            }}
-            error={!!errors.email}
-          />
-        )}
-      />
-      {/* Display email error message */}
-      {errors.email && (
-        <Text style={[styles.errorText, {color: '#ADB2C3'}]}>
-          {errors.email.message}
-        </Text>
-      )}
-
-      {/* Password Label */}
-      <Text style={styles.inputLabel}>Password</Text>
-
-      {/* Password Field with validation */}
-      <Controller
-        name="password"
-        control={control}
-        render={({field: {onChange, onBlur, value}}) => (
-          <TextInput
-            mode="outlined"
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            style={styles.input}
-            secureTextEntry={!showPassword}
-            left={<TextInput.Icon icon="lock" color="#ADB2C3" />}
-            right={
-              <TextInput.Icon
-                icon={showPassword ? 'eye-off' : 'eye'}
-                onPress={() => setShowPassword(!showPassword)}
-                color="#ADB2C3"
+        <View style={styles.formContainer}>
+          <Controller
+            name="email"
+            control={control}
+            render={({field: {onChange, onBlur, value}}) => (
+              <TextInput
+                mode="flat"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                style={styles.input}
+                left={<TextInput.Icon icon="email" color={colors.primary} />}
+                placeholder="Email"
+                placeholderTextColor="#A4AAB9"
+                theme={{
+                  colors: {
+                    primary: colors.primary,
+                    background: 'transparent',
+                  },
+                }}
+                error={!!errors.email}
               />
-            }
-            placeholder="Enter Password"
-            placeholderTextColor="#A4AAB9"
-            theme={{
-              roundness: 15,
-              colors: {
-                primary: '#ADB2C3',
-              },
-            }}
-            error={!!errors.password}
+            )}
           />
-        )}
-      />
-      {/* Display password error message */}
-      {errors.password && (
-        <Text style={styles.errorText}>{errors.password.message}</Text>
-      )}
+          {errors.email && (
+            <Text style={styles.errorText}>{errors.email.message}</Text>
+          )}
 
-      {/* Forgot Password link */}
-      <TouchableOpacity
-        onPress={() => {
-          /* TODO: Handle forgot password navigation */
-        }}>
-        <Text style={styles.forgotPassword}>Forgot password?</Text>
-      </TouchableOpacity>
+          <Controller
+            name="password"
+            control={control}
+            render={({field: {onChange, onBlur, value}}) => (
+              <TextInput
+                mode="flat"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                style={styles.input}
+                secureTextEntry={!showPassword}
+                left={<TextInput.Icon icon="lock" color={colors.primary} />}
+                right={
+                  <TextInput.Icon
+                    icon={showPassword ? 'eye-off' : 'eye'}
+                    onPress={() => setShowPassword(!showPassword)}
+                    color={colors.primary}
+                  />
+                }
+                placeholder="Password"
+                placeholderTextColor="#A4AAB9"
+                theme={{
+                  colors: {
+                    primary: colors.primary,
+                    background: 'transparent',
+                  },
+                }}
+                error={!!errors.password}
+              />
+            )}
+          />
+          {errors.password && (
+            <Text style={styles.errorText}>{errors.password.message}</Text>
+          )}
 
-      {/* Sign In Button */}
-      <Button
-        mode="contained"
-        style={styles.signInButton}
-        onPress={handleSubmit(onSubmit)}
-        theme={{roundness: 30}}>
-        Sign In
-      </Button>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('ForgotPassword')}
+            style={styles.forgotPasswordContainer}>
+            <Text style={styles.forgotPassword}>Forgot password?</Text>
+          </TouchableOpacity>
 
-      {/* OR text for alternative login options */}
-      <Text style={styles.orText}>or</Text>
+          <Button
+            mode="contained"
+            style={styles.signInButton}
+            labelStyle={styles.buttonLabel}
+            onPress={handleSubmit(onSubmit)}
+            loading={isSubmitting}
+            disabled={isSubmitting}>
+            Sign In
+          </Button>
+        </View>
 
-      {/* Social Login with Google */}
-      <Button
-        mode="outlined"
-        icon="google"
-        style={styles.socialButton}
-        onPress={() => {
-          /* TODO: Handle Google login */
-        }}
-        theme={{roundness: 30}}>
-        Continue with Google
-      </Button>
+        <View style={styles.socialContainer}>
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.orText}>or continue with</Text>
+            <View style={styles.dividerLine} />
+          </View>
 
-      {/* Social Login with Apple */}
-      <Button
-        mode="contained"
-        icon="apple"
-        style={styles.appleButton}
-        onPress={() => {
-          /* TODO: Handle Apple login */
-        }}
-        theme={{roundness: 30}}>
-        Continue with Apple
-      </Button>
+          <View style={styles.socialButtonsContainer}>
+            <Button
+              mode="outlined"
+              icon="google"
+              style={[styles.socialButton, styles.googleButton]}
+              labelStyle={styles.socialButtonLabel}>
+              Google
+            </Button>
 
-      {/* Signup prompt */}
-      <Text style={styles.signupText}>
-        Don't have an account?{' '}
-        <Text
-          style={styles.signupLink}
-          onPress={() => navigation.navigate('Signup')}>
-          Sign up
-        </Text>
-      </Text>
-    </View>
+            <Button
+              mode="outlined"
+              icon="apple"
+              style={[styles.socialButton, styles.appleButton]}
+              labelStyle={styles.socialButtonLabel}>
+              Apple
+            </Button>
+          </View>
+        </View>
+
+        <View style={styles.footer}>
+          <Text style={styles.signupText}>
+            Don't have an account?{' '}
+            <Text
+              style={styles.signupLink}
+              onPress={() => navigation.navigate('Signup')}>
+              Sign up
+            </Text>
+          </Text>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
-// Styles for the login screen components
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    padding: 24,
+  },
+  headerContainer: {
+    marginTop: 40,
+    marginBottom: 40,
+    alignItems: 'center',
+  },
+  formContainer: {
+    marginBottom: 32,
   },
   logo: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
-    color: '#FFA500',
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#FF8C00',
+    marginBottom: 16,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 10,
+    fontWeight: '600',
+    color: '#1A1A1A',
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 14,
-    textAlign: 'center',
-    color: '#777',
-    marginBottom: 30,
-  },
-  inputLabel: {
     fontSize: 16,
-    color: '#333',
-    marginBottom: 5,
+    color: '#666666',
   },
   input: {
-    marginBottom: 15,
-    backgroundColor: '#F8F9FD',
+    marginBottom: 16,
+    backgroundColor: '#F5F5F5',
+    height: 56,
+    fontSize: 16,
   },
   errorText: {
-    color: 'red',
-    marginBottom: 10,
+    color: '#FF3B30',
     fontSize: 12,
+    marginTop: -12,
+    marginBottom: 16,
+    marginLeft: 8,
+  },
+  forgotPasswordContainer: {
+    alignItems: 'flex-end',
+    marginBottom: 24,
   },
   forgotPassword: {
-    color: '#FFA500',
-    textAlign: 'right',
-    marginBottom: 20,
+    color: '#FF8C00',
+    fontSize: 14,
   },
   signInButton: {
-    backgroundColor: '#FFA500',
-    marginBottom: 10,
-    paddingVertical: 10,
+    height: 56,
     justifyContent: 'center',
+    backgroundColor: '#FF8C00',
+  },
+  buttonLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  socialContainer: {
+    marginBottom: 32,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E5E5E5',
   },
   orText: {
-    textAlign: 'center',
-    marginVertical: 10,
-    fontSize: 16,
-    color: '#777',
+    marginHorizontal: 16,
+    color: '#666666',
+    fontSize: 14,
+  },
+  socialButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   socialButton: {
-    borderColor: '#4285F4',
-    borderWidth: 1,
-    marginBottom: 20,
-    paddingVertical: 10,
+    flex: 0.48,
+    height: 56,
     justifyContent: 'center',
+    borderColor: '#E5E5E5',
+  },
+  googleButton: {
+    backgroundColor: '#FFFFFF',
   },
   appleButton: {
-    backgroundColor: '#000',
-    marginBottom: 20,
-    paddingVertical: 10,
-    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  socialButtonLabel: {
+    fontSize: 14,
+    color: '#1A1A1A',
+  },
+  footer: {
+    marginTop: 'auto',
+    alignItems: 'center',
   },
   signupText: {
-    textAlign: 'center',
     fontSize: 14,
-    color: '#777',
+    color: '#666666',
   },
   signupLink: {
-    color: '#FFA500',
-    fontWeight: 'bold',
+    color: '#FF8C00',
+    fontWeight: '600',
   },
 });

@@ -4,12 +4,23 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
+      "@/*": ["./src/*"],
       "@components": ["./src/components/index"],
       "@components/*": ["./src/components/*"],
+      "@constants/*": ["./src/constants/*"],
       "@screens": ["./src/screens/index"],
       "@screens/*": ["./src/screens/*"],
       "@navigation": ["./src/navigation/index"],
       "@navigation/*": ["./src/navigation/*"],
+      "@services/*": ["./src/services/*"],
+      "@api": ["./src/api/index"],
+      "@api/*": ["./src/api/*"],
+      "@hooks": ["./src/hooks/index"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@store/*": ["./src/store/*"],
+      "@theme": ["./src/theme/index"],
+      "@theme/*": ["./src/theme/*"],
     }
-  }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/types/**/*.d.ts"]
 }

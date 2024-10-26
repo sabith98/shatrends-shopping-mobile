@@ -1,6 +1,6 @@
 import {MD3LightTheme as DefaultTheme} from 'react-native-paper';
 
-const theme = {
+export const theme = {
   ...DefaultTheme,
   roundness: 6, // Default border radius for buttons, inputs, etc.
   colors: {
@@ -62,4 +62,3 @@ const theme = {
   },
 };
 
-export default theme;
