@@ -3,50 +3,54 @@
  * Handles authentication-based navigation flow
  */
 
-import React, {useEffect} from 'react';
-import {Text} from 'react-native-paper';
+import React from 'react';
+import {ActivityIndicator, View} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {AuthStack, MainStack} from './stacks';
-import {storage} from '@services/storage';
-import {STORAGE_KEYS} from '@constants/storage';
-import {clearAuth} from '@store/slices/authSlice';
 import {useShaAuth} from '@hooks';
-import { useDispatch } from 'react-redux';
+import {
+  SignInScreen,
+  SignUpScreen,
+  ForgotPasswordScreen,
+  OTPScreen,
+  HomeScreen,
+} from '@screens';
 
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
-  const dispatch = useDispatch();
   const {isAuthenticated, isLoading} = useShaAuth();
-
-  // Check token on initial load
-  useEffect(() => {
-    const initializeAuth = async () => {
-      const token = await storage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-      if (!token) {
-        // If no token exists, clear auth state immediately
-        dispatch(clearAuth());
-      }
-    };
-
-    initializeAuth();
-  }, [dispatch]);
 
   // Show loading screen while checking authentication
   if (isLoading) {
     // TODO: Implement LoadingScreen
-    return <Text>Loading...</Text>;
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
   }
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{headerShown: false}}>
+      <Stack.Navigator>
         {/* Conditional rendering based on authentication state */}
         {!isAuthenticated ? (
-          <Stack.Screen name="Auth" component={AuthStack} />
+          // Auth Stack
+          <Stack.Group screenOptions={{headerShown: false}}>
+            <Stack.Screen name="Login" component={SignInScreen} />
+            <Stack.Screen name="Signup" component={SignUpScreen} />
+            <Stack.Screen
+              name="ForgotPassword"
+              component={ForgotPasswordScreen}
+            />
+            <Stack.Screen name="OTP" component={OTPScreen} />
+          </Stack.Group>
         ) : (
-          <Stack.Screen name="Main" component={MainStack} />
+          // Main Stack
+          <Stack.Group>
+            <Stack.Screen name="Home" component={HomeScreen} />
+          </Stack.Group>
         )}
       </Stack.Navigator>
     </NavigationContainer>

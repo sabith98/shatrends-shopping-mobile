@@ -4,32 +4,40 @@
  */
 
 import {useEffect} from 'react';
-import {useSelector} from 'react-redux';
-import {useGetMeQuery} from '@api/authApi';
+import {useDispatch, useSelector} from 'react-redux';
 import {storage} from '@services/storage';
 import {STORAGE_KEYS} from '@constants/storage';
 import type {RootState} from '@store/store';
+import {setAuthenticated, setLoading, clearAuth} from '@store/slices/authSlice';
 
 export const useShaAuth = () => {
+  const dispatch = useDispatch();
   const {isAuthenticated, user, isLoading, error} = useSelector(
     (state: RootState) => state.auth
   );
-  const {refetch} = useGetMeQuery(undefined, {
-    skip: !isAuthenticated,
-  });
 
-  // Check for stored token and validate on mount
+  // Handle initial auth check
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = await storage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-      if (token && !user) {
-        // Only fetch user data if we have a token but no user data
-        refetch();
+    const initializeAuth = async () => {
+      try {
+        dispatch(setLoading(true));
+        const token = await storage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+
+        if (token) {
+          dispatch(setAuthenticated());
+        } else {
+          dispatch(clearAuth());
+        }
+      } catch (err) {
+        console.error('Auth initialization failed:', err);
+        dispatch(clearAuth());
+      } finally {
+        dispatch(setLoading(false));
       }
     };
 
-    checkAuth();
-  }, [refetch, user]);
+    initializeAuth();
+  }, [dispatch]);
 
   return {
     isAuthenticated,

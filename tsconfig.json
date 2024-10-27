@@ -20,6 +20,7 @@
       "@store/*": ["./src/store/*"],
       "@theme": ["./src/theme/index"],
       "@theme/*": ["./src/theme/*"],
+      "@utils/*": ["./src/utils/*"],
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/types/**/*.d.ts"]

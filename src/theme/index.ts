@@ -1,64 +1,75 @@
-import {MD3LightTheme as DefaultTheme} from 'react-native-paper';
+import {MD3LightTheme, configureFonts} from 'react-native-paper';
+import type {MD3Theme} from 'react-native-paper';
 
-export const theme = {
-  ...DefaultTheme,
-  roundness: 6, // Default border radius for buttons, inputs, etc.
-  colors: {
-    ...DefaultTheme.colors,
-
-    // Primary brand color (used for primary buttons, links, etc.)
-    primary: '#FF6F61',
-
-    // Secondary color for accents and highlights
-    accent: '#4CAF50',
-
-    // Background for the entire app
-    background: '#F5F5F5',
-
-    // Surface color for cards, modals, etc.
-    surface: '#FFFFFF',
-
-    // Default text color
-    text: '#212121',
-
-    // Success state color (e.g., for confirmation)
-    success: '#4CAF50',
-
-    // Error state color (e.g., form validation errors)
-    error: '#F44336',
-
-    // Warning state color (e.g., for alerts)
-    warning: '#FFC107',
-
-    // Info state color (e.g., for informational banners)
-    info: '#2196F3',
-
-    // Placeholder color for inputs
-    placeholder: '#9E9E9E',
-
-    // Disabled state color for buttons, inputs, etc.
-    disabled: '#BDBDBD',
-
-    // Color for borders (input fields, card borders, etc.)
-    border: '#E0E0E0',
-
-    // Default text color when placed on primary background
-    onPrimary: '#FFFFFF',
-
-    // Default text color when placed on a surface background
-    onSurface: '#000000',
-
-    // App bar or header background color
-    appBarBackground: '#FF6F61',
-
-    // Icon colors used in buttons or inputs
-    icon: '#757575',
-
-    // Divider lines color
-    divider: '#BDBDBD',
-
-    // Shadows (not directly used by Paper but a useful reference for eCommerce)
-    shadow: 'rgba(0, 0, 0, 0.2)',
+// E-commerce focused color palette
+const colors = {
+  primary: '#FF385C', // Vibrant Red (like Airbnb)
+  primaryContainer: '#FFE4E8',
+  secondary: '#00A699', // Teal accent
+  secondaryContainer: '#E6F7F5',
+  tertiary: '#484848', // Neutral dark
+  tertiaryContainer: '#F7F7F7',
+  background: '#FFFFFF',
+  surface: '#FFFFFF',
+  surfaceVariant: '#F8F8F8',
+  error: '#FF4444',
+  onPrimary: '#FFFFFF',
+  onPrimaryContainer: '#FF385C',
+  onSecondary: '#FFFFFF',
+  onSecondaryContainer: '#00A699',
+  onTertiary: '#FFFFFF',
+  onTertiaryContainer: '#484848',
+  onBackground: '#222222',
+  onSurface: '#222222',
+  onSurfaceVariant: '#717171',
+  outline: '#E8E8E8',
+  outlineVariant: '#DDDDDD',
+  shadow: '#000000',
+  inverseSurface: '#222222',
+  inverseOnSurface: '#FFFFFF',
+  inversePrimary: '#FF385C',
+  backdrop: '#000000',
+  elevation: {
+    level0: 'transparent',
+    level1: '#FFFFFF',
+    level2: '#F8F8F8',
+    level3: '#F3F3F3',
+    level4: '#EEEEEE',
+    level5: '#E8E8E8',
   },
 };
 
+const fontConfig = {
+  fontFamily: 'System',
+  displayLarge: {
+    fontFamily: 'System',
+    fontSize: 57,
+    fontWeight: '700',
+    letterSpacing: -0.25,
+    lineHeight: 64,
+  },
+  displayMedium: {
+    fontFamily: 'System',
+    fontSize: 45,
+    fontWeight: '600',
+    letterSpacing: 0,
+    lineHeight: 52,
+  },
+  displaySmall: {
+    fontFamily: 'System',
+    fontSize: 36,
+    fontWeight: '600',
+    letterSpacing: 0,
+    lineHeight: 44,
+  },
+  // Add more font configurations as needed
+};
+
+export const theme: MD3Theme = {
+  ...MD3LightTheme,
+  colors: {
+    ...MD3LightTheme.colors,
+    ...colors,
+  },
+  fonts: configureFonts({config: fontConfig}),
+};

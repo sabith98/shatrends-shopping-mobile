@@ -23,6 +23,12 @@ const authSlice = createSlice({
       state.isLoading = false;
       state.error = null;
     },
+    // Updates state with authentication status
+    setAuthenticated: state => {
+      state.isAuthenticated = true;
+      state.isLoading = false;
+      state.error = null;
+    },
     // Clears all authentication state
     clearAuth: state => {
       state.user = null;
@@ -41,5 +47,6 @@ const authSlice = createSlice({
   },
 });
 
-export const {setUser, clearAuth, setError} = authSlice.actions;
+export const {setUser, setAuthenticated, clearAuth, setError, setLoading} =
+  authSlice.actions;
 export default authSlice.reducer;

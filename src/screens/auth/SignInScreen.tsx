@@ -1,4 +1,4 @@
-import React, {useState, useLayoutEffect} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -7,28 +7,59 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  SafeAreaView,
+  StatusBar,
 } from 'react-native';
 import {TextInput, Button, useTheme} from 'react-native-paper';
+import {ShaSnackbar} from '@components/shared';
 import {useForm, Controller} from 'react-hook-form';
 import * as yup from 'yup';
 import {yupResolver} from '@hookform/resolvers/yup';
-import {LoginScreenNavigationProp} from '../../navigation/types';
+import {HomeScreenNavigationProp} from '@navigation/types';
+import {
+  spacing,
+  responsiveFontSize,
+  moderateScale,
+  useResponsiveDimensions,
+} from '@utils/responsive';
+import {useSignInMutation} from '@api';
 
 interface FormData {
-  email: string;
+  identifier: string;
   password: string;
 }
 
 export const SignInScreen: React.FC<{
-  navigation: LoginScreenNavigationProp;
+  navigation: HomeScreenNavigationProp;
 }> = ({navigation}) => {
-  const {colors} = useTheme();
+  const theme = useTheme();
+  const {width, height, isPortrait, deviceType} = useResponsiveDimensions();
+  const statusBarHeight = StatusBar.currentHeight || 0;
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [signIn, {isLoading}] = useSignInMutation();
+  const [snackbarData, setSnackbarData] = useState({
+    message: '',
+    type: 'info' as 'success' | 'error' | 'info' | 'warning',
+    visible: false,
+  });
 
+  // Validation schema for the sign-in form
   const schema = yup.object().shape({
-    email: yup
+    identifier: yup
       .string()
-      .email('Please enter a valid email')
-      .required('Email is required'),
+      .required('Email or username is required')
+      .test(
+        'email-or-username',
+        'Please enter a valid email or username',
+        value => {
+          // Check if the value is a valid email
+          const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+          // Check if the value is a valid username (alphanumeric, underscores, 3-30 characters)
+          const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
+
+          return emailRegex.test(value) || usernameRegex.test(value);
+        }
+      ),
     password: yup
       .string()
       .min(6, 'Password must be at least 6 characters long')
@@ -43,230 +74,426 @@ export const SignInScreen: React.FC<{
     resolver: yupResolver(schema),
   });
 
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-
+  // Submit function to handle sign-in
   const onSubmit = async (data: FormData) => {
     try {
-      // TODO: Implement sign-in logic here
+      const {identifier, password} = data;
+      const response = await signIn({identifier, password}).unwrap();
+      console.log('Sign in successful:', response);
+      // Show success message
+      setSnackbarData({
+        message: 'Sign in successful!',
+        type: 'success',
+        visible: true,
+      });
+      navigation.navigate('Home');
     } catch (error) {
       console.error('Sign in error:', error);
+      // Show error message
+      setSnackbarData({
+        message: 'Sign in error. Please check your credentials.',
+        type: 'error',
+        visible: true,
+      });
+    }
+  };
+
+  const getContainerPadding = () => {
+    switch (deviceType) {
+      case 'tablet':
+        return {paddingHorizontal: spacing.xl};
+      case 'desktop':
+        return {paddingHorizontal: spacing.xxl};
+      default:
+        return {paddingHorizontal: spacing.md};
+    }
+  };
+
+  const getFormWidth = () => {
+    switch (deviceType) {
+      case 'tablet':
+        return isPortrait ? '80%' : '60%';
+      case 'desktop':
+        return '40%';
+      default:
+        return '100%';
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.logo}>Shatrends</Text>
-          <Text style={styles.title}>Welcome back</Text>
-          <Text style={styles.subtitle}>Sign in to continue shopping</Text>
-        </View>
-
-        <View style={styles.formContainer}>
-          <Controller
-            name="email"
-            control={control}
-            render={({field: {onChange, onBlur, value}}) => (
-              <TextInput
-                mode="flat"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                style={styles.input}
-                left={<TextInput.Icon icon="email" color={colors.primary} />}
-                placeholder="Email"
-                placeholderTextColor="#A4AAB9"
-                theme={{
-                  colors: {
-                    primary: colors.primary,
-                    background: 'transparent',
+    <SafeAreaView
+      style={[styles.safeArea, {backgroundColor: theme.colors.background}]}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={[styles.container, {backgroundColor: theme.colors.background}]}>
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            getContainerPadding(),
+            {
+              minHeight: height - (Platform.OS === 'ios' ? 0 : statusBarHeight),
+              justifyContent: 'center',
+            },
+          ]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled">
+          <View
+            style={[
+              styles.formWrapper,
+              {
+                width: getFormWidth(),
+                marginVertical: deviceType === 'phone' ? 0 : spacing.xxl,
+              },
+            ]}>
+            <View style={styles.headerContainer}>
+              <Text
+                style={[
+                  styles.logo,
+                  {
+                    fontSize: responsiveFontSize(32),
+                    color: theme.colors.primary,
                   },
-                }}
-                error={!!errors.email}
-              />
-            )}
-          />
-          {errors.email && (
-            <Text style={styles.errorText}>{errors.email.message}</Text>
-          )}
+                ]}>
+                Shatrends
+              </Text>
+              <Text
+                style={[
+                  styles.title,
+                  {
+                    fontSize: responsiveFontSize(24),
+                    color: theme.colors.onBackground,
+                  },
+                ]}>
+                Welcome back
+              </Text>
+              <Text
+                style={[
+                  styles.subtitle,
+                  {
+                    fontSize: responsiveFontSize(16),
+                    color: theme.colors.onSurfaceVariant,
+                  },
+                ]}>
+                Sign in to continue shopping
+              </Text>
+            </View>
 
-          <Controller
-            name="password"
-            control={control}
-            render={({field: {onChange, onBlur, value}}) => (
-              <TextInput
-                mode="flat"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                style={styles.input}
-                secureTextEntry={!showPassword}
-                left={<TextInput.Icon icon="lock" color={colors.primary} />}
-                right={
-                  <TextInput.Icon
-                    icon={showPassword ? 'eye-off' : 'eye'}
-                    onPress={() => setShowPassword(!showPassword)}
-                    color={colors.primary}
+            <View style={styles.formContainer}>
+              {/* Email/Username Input */}
+              <Controller
+                name="identifier"
+                control={control}
+                render={({field: {onChange, onBlur, value}}) => (
+                  <TextInput
+                    mode="outlined"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    style={[styles.input, {height: moderateScale(56)}]}
+                    outlineStyle={{borderRadius: 8}}
+                    left={
+                      <TextInput.Icon
+                        icon="account-outline"
+                        color={(focused: boolean) =>
+                          focused
+                            ? theme.colors.primary
+                            : theme.colors.onSurfaceVariant
+                        }
+                      />
+                    }
+                    placeholder="Email or username"
+                    placeholderTextColor={theme.colors.onSurfaceVariant}
+                    theme={{
+                      colors: {
+                        primary: theme.colors.primary,
+                        onSurfaceVariant: theme.colors.onSurfaceVariant,
+                      },
+                    }}
+                    error={!!errors.identifier}
                   />
-                }
-                placeholder="Password"
-                placeholderTextColor="#A4AAB9"
-                theme={{
-                  colors: {
-                    primary: colors.primary,
-                    background: 'transparent',
-                  },
-                }}
-                error={!!errors.password}
+                )}
               />
-            )}
+              {errors.identifier && (
+                <Text style={[styles.errorText, {color: theme.colors.error}]}>
+                  {errors.identifier.message}
+                </Text>
+              )}
+
+              {/* Password Input */}
+              <Controller
+                name="password"
+                control={control}
+                render={({field: {onChange, onBlur, value}}) => (
+                  <TextInput
+                    mode="outlined"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    style={[styles.input, {height: moderateScale(56)}]}
+                    outlineStyle={{borderRadius: 8}}
+                    secureTextEntry={!showPassword}
+                    left={
+                      <TextInput.Icon
+                        icon="lock-outline"
+                        color={(focused: boolean) =>
+                          focused
+                            ? theme.colors.primary
+                            : theme.colors.onSurfaceVariant
+                        }
+                      />
+                    }
+                    right={
+                      <TextInput.Icon
+                        icon={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                        onPress={() => setShowPassword(!showPassword)}
+                        color={theme.colors.onSurfaceVariant}
+                      />
+                    }
+                    placeholder="Password"
+                    placeholderTextColor={theme.colors.onSurfaceVariant}
+                    theme={{
+                      colors: {
+                        primary: theme.colors.primary,
+                        onSurfaceVariant: theme.colors.onSurfaceVariant,
+                      },
+                    }}
+                    error={!!errors.password}
+                  />
+                )}
+              />
+              {errors.password && (
+                <Text style={[styles.errorText, {color: theme.colors.error}]}>
+                  {errors.password.message}
+                </Text>
+              )}
+
+              <TouchableOpacity
+                onPress={() => navigation.navigate('ForgotPassword')}
+                style={styles.forgotPasswordContainer}>
+                <Text
+                  style={[
+                    styles.forgotPassword,
+                    {
+                      fontSize: responsiveFontSize(14),
+                      color: theme.colors.primary,
+                    },
+                  ]}>
+                  Forgot password?
+                </Text>
+              </TouchableOpacity>
+
+              <Button
+                mode="contained"
+                style={[
+                  styles.signInButton,
+                  {
+                    height: moderateScale(56),
+                    borderRadius: 28,
+                  },
+                ]}
+                buttonColor={theme.colors.primary}
+                labelStyle={[
+                  styles.buttonLabel,
+                  {fontSize: responsiveFontSize(16), letterSpacing: 0.5},
+                ]}
+                onPress={handleSubmit(onSubmit)}
+                loading={isLoading}
+                disabled={isLoading}>
+                Sign In
+              </Button>
+            </View>
+
+            <View style={styles.socialContainer}>
+              <View style={styles.divider}>
+                <View
+                  style={[
+                    styles.dividerLine,
+                    {backgroundColor: theme.colors.outline},
+                  ]}
+                />
+                <Text
+                  style={[
+                    styles.orText,
+                    {
+                      fontSize: responsiveFontSize(14),
+                      color: theme.colors.onSurfaceVariant,
+                    },
+                  ]}>
+                  or continue with
+                </Text>
+                <View
+                  style={[
+                    styles.dividerLine,
+                    {backgroundColor: theme.colors.outline},
+                  ]}
+                />
+              </View>
+
+              <View style={styles.socialButtonsContainer}>
+                <Button
+                  mode="outlined"
+                  icon="google"
+                  style={[
+                    styles.socialButton,
+                    {
+                      height: moderateScale(56),
+                      borderColor: theme.colors.outline,
+                      borderRadius: 28,
+                      borderWidth: 1.5,
+                    },
+                  ]}
+                  contentStyle={{
+                    height: moderateScale(56),
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}
+                  labelStyle={[
+                    styles.socialButtonLabel,
+                    {
+                      fontSize: responsiveFontSize(16),
+                      letterSpacing: 0.25,
+                      fontWeight: '500',
+                      color: theme.colors.onBackground,
+                    },
+                  ]}>
+                  Google
+                </Button>
+
+                <Button
+                  mode="contained"
+                  icon="apple"
+                  style={[
+                    styles.socialButton,
+                    {
+                      height: moderateScale(56),
+                      borderRadius: 28,
+                      backgroundColor: '#000000',
+                      elevation: 2,
+                    },
+                  ]}
+                  contentStyle={{
+                    height: moderateScale(56),
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}
+                  labelStyle={[
+                    styles.socialButtonLabel,
+                    {
+                      fontSize: responsiveFontSize(16),
+                      letterSpacing: 0.25,
+                      fontWeight: '500',
+                      color: '#FFFFFF',
+                    },
+                  ]}>
+                  Apple
+                </Button>
+              </View>
+            </View>
+
+            <View style={styles.footer}>
+              <Text
+                style={[
+                  styles.signupText,
+                  {
+                    fontSize: responsiveFontSize(14),
+                    color: theme.colors.onSurfaceVariant,
+                  },
+                ]}>
+                Don't have an account?{' '}
+                <Text
+                  style={[styles.signupLink, {color: theme.colors.primary}]}
+                  onPress={() => navigation.navigate('Signup')}>
+                  Sign up
+                </Text>
+              </Text>
+            </View>
+          </View>
+
+          {/* AppSnackbar component to display notifications */}
+          <ShaSnackbar
+            message={snackbarData.message}
+            type={snackbarData.type}
+            visible={snackbarData.visible}
+            onDismiss={() =>
+              setSnackbarData(prev => ({...prev, visible: false}))
+            }
           />
-          {errors.password && (
-            <Text style={styles.errorText}>{errors.password.message}</Text>
-          )}
-
-          <TouchableOpacity
-            onPress={() => navigation.navigate('ForgotPassword')}
-            style={styles.forgotPasswordContainer}>
-            <Text style={styles.forgotPassword}>Forgot password?</Text>
-          </TouchableOpacity>
-
-          <Button
-            mode="contained"
-            style={styles.signInButton}
-            labelStyle={styles.buttonLabel}
-            onPress={handleSubmit(onSubmit)}
-            loading={isSubmitting}
-            disabled={isSubmitting}>
-            Sign In
-          </Button>
-        </View>
-
-        <View style={styles.socialContainer}>
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.orText}>or continue with</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          <View style={styles.socialButtonsContainer}>
-            <Button
-              mode="outlined"
-              icon="google"
-              style={[styles.socialButton, styles.googleButton]}
-              labelStyle={styles.socialButtonLabel}>
-              Google
-            </Button>
-
-            <Button
-              mode="outlined"
-              icon="apple"
-              style={[styles.socialButton, styles.appleButton]}
-              labelStyle={styles.socialButtonLabel}>
-              Apple
-            </Button>
-          </View>
-        </View>
-
-        <View style={styles.footer}>
-          <Text style={styles.signupText}>
-            Don't have an account?{' '}
-            <Text
-              style={styles.signupLink}
-              onPress={() => navigation.navigate('Signup')}>
-              Sign up
-            </Text>
-          </Text>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   scrollContent: {
     flexGrow: 1,
-    padding: 24,
+    alignItems: 'center',
+  },
+  formWrapper: {
+    width: '100%',
+    maxWidth: 500,
+    alignSelf: 'center',
   },
   headerContainer: {
-    marginTop: 40,
-    marginBottom: 40,
+    marginBottom: spacing.xl,
     alignItems: 'center',
   },
   formContainer: {
-    marginBottom: 32,
+    marginBottom: spacing.xl,
   },
   logo: {
-    fontSize: 32,
     fontWeight: '700',
-    color: '#FF8C00',
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   title: {
-    fontSize: 24,
     fontWeight: '600',
-    color: '#1A1A1A',
-    marginBottom: 8,
+    marginBottom: spacing.xs,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666666',
+    fontWeight: '400',
   },
   input: {
-    marginBottom: 16,
-    backgroundColor: '#F5F5F5',
-    height: 56,
-    fontSize: 16,
+    marginBottom: spacing.md,
   },
   errorText: {
-    color: '#FF3B30',
-    fontSize: 12,
-    marginTop: -12,
-    marginBottom: 16,
-    marginLeft: 8,
+    fontSize: responsiveFontSize(12),
+    marginTop: -spacing.sm,
+    marginBottom: spacing.md,
+    marginLeft: spacing.xs,
   },
   forgotPasswordContainer: {
     alignItems: 'flex-end',
-    marginBottom: 24,
+    marginBottom: spacing.xl,
   },
   forgotPassword: {
-    color: '#FF8C00',
-    fontSize: 14,
+    fontWeight: '500',
   },
   signInButton: {
-    height: 56,
     justifyContent: 'center',
-    backgroundColor: '#FF8C00',
   },
   buttonLabel: {
-    fontSize: 16,
     fontWeight: '600',
   },
   socialContainer: {
-    marginBottom: 32,
+    marginBottom: spacing.xl,
   },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: spacing.xl,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E5E5E5',
   },
   orText: {
-    marginHorizontal: 16,
-    color: '#666666',
-    fontSize: 14,
+    marginHorizontal: spacing.md,
   },
   socialButtonsContainer: {
     flexDirection: 'row',
@@ -274,30 +501,19 @@ const styles = StyleSheet.create({
   },
   socialButton: {
     flex: 0.48,
-    height: 56,
     justifyContent: 'center',
-    borderColor: '#E5E5E5',
-  },
-  googleButton: {
-    backgroundColor: '#FFFFFF',
-  },
-  appleButton: {
-    backgroundColor: '#FFFFFF',
   },
   socialButtonLabel: {
-    fontSize: 14,
-    color: '#1A1A1A',
+    fontWeight: '500',
   },
   footer: {
     marginTop: 'auto',
     alignItems: 'center',
   },
   signupText: {
-    fontSize: 14,
-    color: '#666666',
+    fontWeight: '400',
   },
   signupLink: {
-    color: '#FF8C00',
     fontWeight: '600',
   },
 });

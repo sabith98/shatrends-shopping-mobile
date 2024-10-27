@@ -95,10 +95,20 @@ export const authApi = baseApi.injectEndpoints({
      * Logout Mutation
      * Handles user logout by clearing token and auth state
      */
-    logout: builder.mutation<void, void>({
+    logout: builder.mutation<{success: boolean}, void>({
       queryFn: async () => {
-        await storage.removeItem(STORAGE_KEYS.AUTH_TOKEN); // Remove JWT token
-        return {data: undefined};
+        try {
+          await storage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+          return {data: {success: true}};
+        } catch (error) {
+          return {
+            error: {
+              status: 'CUSTOM_ERROR',
+              error: 'Failed to remove auth token',
+              originalError: error,
+            },
+          };
+        }
       },
       async onQueryStarted(_, {dispatch}) {
         dispatch(clearAuth()); // Clear authentication state
