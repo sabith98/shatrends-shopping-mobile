@@ -42,7 +42,8 @@ export const authApi = baseApi.injectEndpoints({
           await storage.setItem(STORAGE_KEYS.AUTH_TOKEN, data.jwt); // Store JWT token
           dispatch(setUser(data.user)); // Update redux state with user data
         } catch (error) {
-          console.error('Login error:', error);
+          // TODO: Implement a centralized error handling utility
+          console.error('An error occurred during login');
           dispatch(clearAuth()); // Clear authentication state on error
         }
       },
@@ -64,7 +65,7 @@ export const authApi = baseApi.injectEndpoints({
           await storage.setItem(STORAGE_KEYS.AUTH_TOKEN, data.jwt); // Store JWT token
           dispatch(setUser(data.user)); // Update redux state with new user data
         } catch (error) {
-          console.error('Registration error:', error);
+          console.error('An error occurred during register');
           dispatch(clearAuth());
         }
       },
