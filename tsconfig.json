@@ -10,6 +10,8 @@
       "@constants/*": ["./src/constants/*"],
       "@screens": ["./src/screens/index"],
       "@screens/*": ["./src/screens/*"],
+      "@layouts": ["./src/layouts/index"],
+      "@layouts/*": ["./src/layouts/*"],
       "@navigation": ["./src/navigation/index"],
       "@navigation/*": ["./src/navigation/*"],
       "@services/*": ["./src/services/*"],

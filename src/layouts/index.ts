@@ -1,0 +1,1 @@
+export {ShaAuthLayout} from './ShaAuthLayout';

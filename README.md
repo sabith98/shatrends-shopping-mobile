@@ -52,7 +52,7 @@ A modern e-commerce mobile application built with React Native and TypeScript, i
 │       ├── baseApi.ts         # Base API setup
 │   ├── components/
 │       ├── auth/              # Authentication components
-│       ├── shared/            # Reusable components
+│       ├── common/            # Reusable components
 │   ├── constants/             # App constants
 │   ├── hooks/                 # Custom hooks
 │   ├── navigation/            # Navigation setup

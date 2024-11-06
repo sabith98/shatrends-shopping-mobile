@@ -1,4 +1,4 @@
-export * from './SignInScreen';
-export * from './SignUpScreen';
-export * from './ForgotPasswordScreen';
-export * from './OTPScreen';
+export {default as SignInScreen} from './SignInScreen';
+export {default as SignUpScreen} from './SignUpScreen';
+export {default as ForgotPasswordScreen} from './ForgotPasswordScreen';
+export {default as OTPScreen} from './OTPScreen';

@@ -1,33 +1,39 @@
 import React, {useState, useEffect} from 'react';
 import {Snackbar, useTheme} from 'react-native-paper';
 
+
+/**
+ * Interface for the ShaSnackbar component props
+ * @interface ShaSnackbarProps
+ * @property {string} [message] - The message to display in the snackbar
+ * @property {'success' | 'error' | 'info' | 'warning'} [type] - The type of snackbar which determines its appearance
+ * @property {boolean} visible - Controls the visibility of the snackbar
+ * @property {() => void} onDismiss - Callback function called when the snackbar is dismissed
+ * @property {number} [duration] - Duration in milliseconds for which the snackbar is visible
+ */
 interface ShaSnackbarProps {
-  /** The message to display in the Snackbar */
   message?: string;
-
-  /** The type of Snackbar message to display:
-   * - success: for successful actions
-   * - error: for error notifications
-   * - info: for informational messages
-   * - warning: for cautionary notes
-   */
   type?: 'success' | 'error' | 'info' | 'warning';
-
-  /** Boolean to control the visibility of the Snackbar */
   visible: boolean;
-
-  /** Function to handle the dismissal of the Snackbar */
   onDismiss: () => void;
-
-  /** Duration in milliseconds for which the Snackbar will be visible (default: 3000ms) */
   duration?: number;
 }
 
 /**
- * ShaSnackbar component - a reusable, customizable Snackbar for displaying notifications across the app.
+ * A customizable snackbar component that supports different types of notifications
+ * with configurable duration and appearance based on the current theme.
  *
- * This component is designed to provide consistent feedback to users by showing messages for different types
- * (success, error, info, warning) with distinct styles. Ideal for use throughout the app to ensure consistency.
+ * @component
+ * @example
+ * ```
+ * <ShaSnackbar
+ *   message="Operation successful!"
+ *   type="success"
+ *   visible={showSnackbar}  // set showSnackbar boolean state variable
+ *   onDismiss={() => setShowSnackbar(false)}
+ *   duration={5000}
+ * />
+ * ```
  */
 export const ShaSnackbar: React.FC<ShaSnackbarProps> = ({
   message = '',
@@ -36,7 +42,7 @@ export const ShaSnackbar: React.FC<ShaSnackbarProps> = ({
   onDismiss,
   duration = 3000,
 }) => {
-  const theme = useTheme(); // Access the current theme for styling
+  const theme = useTheme(); // Access theme for consistent styling
   const [snackbarVisible, setSnackbarVisible] = useState(visible);
 
   /**
@@ -47,8 +53,8 @@ export const ShaSnackbar: React.FC<ShaSnackbarProps> = ({
   }, [visible]);
 
   /**
-   * Get the background color style based on the message type.
-   * @returns {object} A style object with the appropriate background color.
+   * Determines the background color of the snackbar based on its type
+   * @returns {Object} Style object containing the background color
    */
   const getSnackbarStyle = () => {
     switch (type) {

@@ -3,7 +3,7 @@ import {View, Text} from 'react-native';
 import {useLogoutMutation} from '@api';
 import {Button} from 'react-native-paper';
 
-export const HomeScreen = () => {
+const HomeScreen = () => {
   const [logout, {isLoading}] = useLogoutMutation();
 
   const handleLogout = async () => {
@@ -24,3 +24,4 @@ export const HomeScreen = () => {
     </View>
   );
 };
+export default HomeScreen;
