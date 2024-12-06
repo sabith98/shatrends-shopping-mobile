@@ -4,19 +4,7 @@ import {TextInput, useTheme} from 'react-native-paper';
 import {Control, Controller} from 'react-hook-form';
 import {spacing, responsiveFontSize, moderateScale} from '@utils/responsive';
 
-/**
- * Interface for the ShaTextInput component props
- * @interface ShaTextInputProps
- * @property {string} name - Field name for form control
- * @property {Control<any>} control - React Hook Form control object
- * @property {string} icon - Name of the icon to display on the left side
- * @property {string} placeholder - Placeholder text for the input
- * @property {boolean} [secureTextEntry] - Whether to hide text input (for passwords)
- * @property {Object} [rightIcon] - Configuration for optional right icon
- * @property {string} rightIcon.name - Name of the right icon
- * @property {() => void} [rightIcon.onPress] - Callback function for right icon press
- * @property {string} [error] - Error message to display below input
- */
+
 interface ShaTextInputProps {
   name: string;
   control: Control<any>;
@@ -28,21 +16,19 @@ interface ShaTextInputProps {
     onPress?: () => void;
   };
   error?: string;
+  keyboardType?: string;
 }
 
 /**
- * A custom text input component that integrates with React Hook Form and React Native Paper.
- * Includes support for icons, error states, and secure text entry.
- *
- * @component
  * @example
- * ```
+ * ```jsx
  * <ShaTextInput
  *   name="email"
  *   control={control}
  *   icon="email"
  *   placeholder="Enter your email"
  *   error={errors.email?.message}
+ *   keyboardType="email-address"
  * />
  * ```
  */
@@ -54,6 +40,7 @@ export const ShaTextInput: React.FC<ShaTextInputProps> = ({
   secureTextEntry,
   rightIcon,
   error,
+  keyboardType,
 }) => {
   // Access theme context for consistent styling
   const theme = useTheme();
@@ -70,23 +57,35 @@ export const ShaTextInput: React.FC<ShaTextInputProps> = ({
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
-            style={[styles.input, {height: moderateScale(56)}]}
-            outlineStyle={{borderRadius: 8}}
+            style={[styles.input, {height: moderateScale(48)}]}
+            outlineStyle={{
+              borderRadius: moderateScale(8),
+              borderWidth: 1,
+            }}
+            theme={{
+              colors: {
+                primary: theme.colors.primary,
+                onSurfaceVariant: theme.colors.onSurfaceVariant,
+                outline: theme.colors.outline,
+              },
+              roundness: moderateScale(8),
+            }}
             secureTextEntry={secureTextEntry}
-            // Configure left icon with dynamic color based on focus state
+            keyboardType={keyboardType}
             left={
               <TextInput.Icon
                 icon={icon}
-                color={(focused: boolean) =>
+                size={moderateScale(20)}
+                color={({focused}: {focused: boolean}) =>
                   focused ? theme.colors.primary : theme.colors.onSurfaceVariant
                 }
               />
             }
-            // Optional right icon configuration
             right={
               rightIcon && (
                 <TextInput.Icon
                   icon={rightIcon.name}
+                  size={moderateScale(20)}
                   onPress={rightIcon.onPress}
                   color={theme.colors.onSurfaceVariant}
                 />
@@ -94,19 +93,19 @@ export const ShaTextInput: React.FC<ShaTextInputProps> = ({
             }
             placeholder={placeholder}
             placeholderTextColor={theme.colors.onSurfaceVariant}
-            theme={{
-              colors: {
-                primary: theme.colors.primary,
-                onSurfaceVariant: theme.colors.onSurfaceVariant,
-              },
-            }}
-            error={!!error}
           />
         )}
       />
       {/* Error message display */}
       {error && (
-        <Text style={[styles.errorText, {color: theme.colors.error}]}>
+        <Text
+          style={[
+            styles.errorText,
+            {
+              color: theme.colors.error,
+              fontSize: responsiveFontSize(12),
+            },
+          ]}>
           {error}
         </Text>
       )}
@@ -116,16 +115,14 @@ export const ShaTextInput: React.FC<ShaTextInputProps> = ({
 
 const styles = StyleSheet.create({
   inputContainer: {
-    marginBottom: spacing.md,
+    marginBottom: moderateScale(12),
   },
   input: {
-    width: '100%',
-    marginBottom: spacing.md,
+    fontSize: responsiveFontSize(14),
+    backgroundColor: 'transparent',
   },
   errorText: {
-    fontSize: responsiveFontSize(12),
-    marginTop: -spacing.sm,
-    marginBottom: spacing.md,
-    marginLeft: spacing.xs,
+    marginTop: moderateScale(4),
+    marginLeft: moderateScale(4),
   },
 });

@@ -2,13 +2,6 @@ import {StyleSheet} from 'react-native';
 import {useTheme} from 'react-native-paper';
 import {ShaPrimaryButton} from '../common';
 
-/**
- * Interface for the ShaSocialButton component props
- * @interface ShaSocialButtonProps
- * @property {'google' | 'apple' | 'facebook'} provider - Social provider identifier
- * @property {() => void} onPress - Callback function when button is pressed
- * @property {object} [style] - Additional styles to apply to the button
- */
 interface ShaSocialButtonProps {
   provider: 'google' | 'apple' | 'facebook';
   onPress: () => void;
@@ -23,11 +16,6 @@ interface ProviderConfig {
   textColor: string;
 }
 
-/**
- * Configuration object for social providers
- * Defines the visual appearance and content for each social login option
- * @constant
- */
 const PROVIDER_CONFIG: Record<string, ProviderConfig> = {
   google: {
     icon: 'google',
@@ -52,12 +40,7 @@ const PROVIDER_CONFIG: Record<string, ProviderConfig> = {
 };
 
 /**
- * A customizable social login button component that supports multiple providers
- * with their respective branded appearances. Builds on top of ShaPrimaryButton
- * with specific styling for each social platform.
- *
- * @component
- * @example
+ * Usage:
  * ```
  * // Single provider
  * <ShaSocialButton
@@ -78,7 +61,7 @@ export const ShaSocialButton: React.FC<ShaSocialButtonProps> = ({
   onPress,
   style,
 }) => {
-  const theme = useTheme(); // Access theme for consistent styling
+  const theme = useTheme();
   const config = PROVIDER_CONFIG[provider]; // Get provider-specific configuration
 
   return (

@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  baseUrl: `${process.env.API_BASE_URL}` || 'http://localhost:1337/api',
+  baseUrl: 'http://192.168.8.196:1337/api',
   auth: {
     signIn: '/auth/local',
     signUp: '/auth/local/register',

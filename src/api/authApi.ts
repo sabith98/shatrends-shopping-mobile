@@ -40,7 +40,7 @@ export const authApi = baseApi.injectEndpoints({
         try {
           const {data} = await queryFulfilled;
           await storage.setItem(STORAGE_KEYS.AUTH_TOKEN, data.jwt); // Store JWT token
-          dispatch(setUser(data.user)); // Update redux state with user data
+          dispatch(setUser(data.user));
         } catch (error) {
           // TODO: Implement a centralized error handling utility
           console.error('An error occurred during login');
@@ -62,8 +62,8 @@ export const authApi = baseApi.injectEndpoints({
       async onQueryStarted(_, {queryFulfilled, dispatch}) {
         try {
           const {data} = await queryFulfilled;
-          await storage.setItem(STORAGE_KEYS.AUTH_TOKEN, data.jwt); // Store JWT token
-          dispatch(setUser(data.user)); // Update redux state with new user data
+          await storage.setItem(STORAGE_KEYS.AUTH_TOKEN, data.jwt);
+          dispatch(setUser(data.user));
         } catch (error) {
           console.error('An error occurred during register');
           dispatch(clearAuth());
@@ -85,7 +85,6 @@ export const authApi = baseApi.injectEndpoints({
           dispatch(setUser(data));
         } catch (error) {
           console.error('Get user error:', error);
-          // Clear authentication state and token on error
           dispatch(clearAuth());
           await storage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
         }
@@ -112,7 +111,7 @@ export const authApi = baseApi.injectEndpoints({
         }
       },
       async onQueryStarted(_, {dispatch}) {
-        dispatch(clearAuth()); // Clear authentication state
+        dispatch(clearAuth());
       },
     }),
   }),

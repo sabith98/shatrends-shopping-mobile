@@ -3,18 +3,6 @@ import {StyleSheet} from 'react-native';
 import {Button, useTheme} from 'react-native-paper';
 import {responsiveFontSize, moderateScale} from '@utils/responsive';
 
-/**
- * Interface for the ShaPrimaryButton component props
- * @interface ShaPrimaryButtonProps
- * @property {string} label - Text to display on the button
- * @property {() => void} onPress - Callback function when button is pressed
- * @property {boolean} [loading] - Whether to show loading state
- * @property {boolean} [disabled] - Whether the button is disabled
- * @property {string} [icon] - Name of the icon to display (from react-native-paper icons)
- * @property {object} [style] - Additional styles for the button container
- * @property {object} [labelStyle] - Additional styles for the button label
- * @property {'contained' | 'outlined'} [mode] - Button appearance mode
- */
 interface ShaPrimaryButtonProps {
   label: string;
   onPress: () => void;
@@ -27,11 +15,7 @@ interface ShaPrimaryButtonProps {
 }
 
 /**
- * A customizable primary button component built on top of React Native Paper's Button.
- * Supports different modes, loading states, icons, and responsive sizing.
- *
- * @component
- * @example
+ * Usage:
  * ```
  * <ShaPrimaryButton
  *   label="Submit"
@@ -64,8 +48,8 @@ export const ShaPrimaryButton: React.FC<ShaPrimaryButtonProps> = ({
       style={[
         styles.button,
         {
-          height: moderateScale(56),
-          borderRadius: 28,
+          height: moderateScale(48),
+          borderRadius: moderateScale(24),
         },
         // Additional styles for outlined mode
         mode === 'outlined' && {
@@ -75,10 +59,13 @@ export const ShaPrimaryButton: React.FC<ShaPrimaryButtonProps> = ({
         style,
       ]}
       buttonColor={mode === 'contained' ? theme.colors.primary : 'transparent'}
-      contentStyle={styles.buttonContent}
+      contentStyle={[
+        styles.buttonContent,
+        {height: moderateScale(48)},
+      ]}
       labelStyle={[
         styles.buttonLabel,
-        {fontSize: responsiveFontSize(16)},
+        {fontSize: responsiveFontSize(14)},
         labelStyle,
       ]}
       onPress={onPress}
@@ -92,14 +79,16 @@ export const ShaPrimaryButton: React.FC<ShaPrimaryButtonProps> = ({
 const styles = StyleSheet.create({
   button: {
     justifyContent: 'center',
+    width: '100%',
   },
   buttonContent: {
-    height: moderateScale(56),
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: moderateScale(16),
   },
   buttonLabel: {
     fontWeight: '600',
     letterSpacing: 0.5,
+    textTransform: 'none',
   },
 });

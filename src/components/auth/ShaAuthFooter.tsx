@@ -21,8 +21,7 @@ interface ShaAuthFooterProps {
  * Typically used to provide navigation between related auth screens
  * (e.g., Login → Sign Up, Sign Up → Login).
  *
- * @component
- * @example
+ * Usage:
  * ```
  * <ShaAuthFooter
  *   message="Don't have an account?"
@@ -36,7 +35,7 @@ export const ShaAuthFooter: React.FC<ShaAuthFooterProps> = ({
   linkText,
   onLinkPress,
 }) => {
-  const theme = useTheme(); // Access theme for consistent styling
+  const theme = useTheme();
 
   return (
     <View style={styles.footer}>

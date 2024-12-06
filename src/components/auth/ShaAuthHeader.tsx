@@ -1,28 +1,8 @@
-/**
- * Header component for authentication screens
- * Displays a logo, title, and subtitle.
- *
- * Usage:
- *
- * <ShaAuthHeader
- *   logo={{ image: require('./path/to/logo.png'), text: 'My App', size: 50 }}
- *   title="Welcome to My App"
- *   subtitle="Please sign in to continue"
- * />
- */
-
 import {View, StyleSheet} from 'react-native';
 import {useTheme, Text} from 'react-native-paper';
-import {spacing, responsiveFontSize} from '@utils/responsive';
+import {spacing, responsiveFontSize, moderateScale} from '@utils/responsive';
 import {ShaLogo} from '../common';
 
-/**
- * Interface for the logo configuration within ShaAuthHeader
- * @interface LogoConfig
- * @property {number | {uri: string}} [image] - Source for image logo
- * @property {string} [text] - Text to display as logo
- * @property {number} [size] - Size of the logo
- */
 interface LogoConfig {
   image?: number | {uri: string};
   text?: string;
@@ -43,12 +23,10 @@ interface ShaAuthHeaderProps {
 }
 
 /**
- * A consistent header component for authentication screens (login, signup, etc.).
+ * A header component for authentication screens (login, signup, etc.).
  * Displays a logo, title, and subtitle in a vertically aligned layout with
- * proper spacing and typography.
  *
- * @component
- * @example
+ * Usage:
  * ```
  * // With image logo
  * <ShaAuthHeader
@@ -76,7 +54,7 @@ export const ShaAuthHeader: React.FC<ShaAuthHeaderProps> = ({
   title,
   subtitle,
 }) => {
-  const theme = useTheme(); // Access theme for consistent styling
+  const theme = useTheme();
 
   return (
     <View style={styles.headerContainer}>
@@ -84,7 +62,7 @@ export const ShaAuthHeader: React.FC<ShaAuthHeaderProps> = ({
       <ShaLogo
         imageSource={logo.image}
         textLogo={logo.text}
-        size={logo.size}
+        size={logo.size || moderateScale(32)}
         style={styles.logo}
       />
 
@@ -93,8 +71,9 @@ export const ShaAuthHeader: React.FC<ShaAuthHeaderProps> = ({
         style={[
           styles.title,
           {
-            fontSize: responsiveFontSize(24),
+            fontSize: responsiveFontSize(20),
             color: theme.colors.onBackground,
+            marginTop: moderateScale(24),
           },
         ]}>
         {title}
@@ -105,8 +84,9 @@ export const ShaAuthHeader: React.FC<ShaAuthHeaderProps> = ({
         style={[
           styles.subtitle,
           {
-            fontSize: responsiveFontSize(16),
+            fontSize: responsiveFontSize(14),
             color: theme.colors.onSurfaceVariant,
+            marginTop: moderateScale(8),
           },
         ]}>
         {subtitle}
@@ -117,17 +97,18 @@ export const ShaAuthHeader: React.FC<ShaAuthHeaderProps> = ({
 
 const styles = StyleSheet.create({
   headerContainer: {
-    marginBottom: spacing.xl,
+    marginBottom: moderateScale(32),
     alignItems: 'center',
   },
   logo: {
-    marginBottom: spacing.md,
+    marginBottom: moderateScale(8),
   },
   title: {
     fontWeight: '600',
-    marginBottom: spacing.xs,
+    textAlign: 'center',
   },
   subtitle: {
-    fontWeight: '400',
+    textAlign: 'center',
+    maxWidth: '80%',
   },
 });
