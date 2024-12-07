@@ -113,6 +113,50 @@ export const authApi = baseApi.injectEndpoints({
         dispatch(clearAuth());
       },
     }),
+
+    /**
+     * Forgot Password Mutation
+     * Sends password reset email to user
+     */
+    forgotPassword: builder.mutation<{ok: boolean}, {email: string}>({
+      query: credentials => ({
+        url: API_CONFIG.auth.forgotPassword,
+        method: 'POST',
+        body: credentials,
+      }),
+      async onQueryStarted(_, {queryFulfilled}) {
+        try {
+          await queryFulfilled;
+        } catch (error: any) {
+          throw new Error(formatErrorMessage(error.error.data));
+        }
+      },
+    }),
+
+    /**
+     * Reset Password Mutation
+     * Resets user password using code from email
+     */
+    resetPassword: builder.mutation<
+      StrapiAuthResponse,
+      {code: string; password: string; passwordConfirmation: string}
+    >({
+      query: credentials => ({
+        url: API_CONFIG.auth.resetPassword,
+        method: 'POST',
+        body: credentials,
+      }),
+      async onQueryStarted(_, {queryFulfilled, dispatch}) {
+        try {
+          const {data} = await queryFulfilled;
+          await storage.setItem(STORAGE_KEYS.AUTH_TOKEN, data.jwt);
+          dispatch(setUser(data.user));
+        } catch (error: any) {
+          dispatch(clearAuth());
+          throw new Error(formatErrorMessage(error.error.data));
+        }
+      },
+    }),
   }),
 });
 
@@ -121,4 +165,6 @@ export const {
   useSignUpMutation,
   useGetMeQuery,
   useLogoutMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
 } = authApi;

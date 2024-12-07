@@ -44,7 +44,9 @@ export const breakpoints = {
 };
 
 // Device type detection
-export const getDeviceType = () => {
+export type DeviceType = 'phone' | 'tablet' | 'desktop';
+
+export const getDeviceType = (): DeviceType => {
   if (SCREEN_WIDTH >= breakpoints.desktop) {return 'desktop';}
   if (SCREEN_WIDTH >= breakpoints.tablet) {return 'tablet';}
   return 'phone';

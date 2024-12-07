@@ -10,35 +10,46 @@ import {ShaAuthHeader} from '@components/auth';
 import {ShaPrimaryButton, ShaSnackbar, ShaTextInput} from '@components/common';
 
 // API & Types
-import {useForgotPasswordMutation} from '@api/authApi';
-import {ForgotPasswordScreenNavigationProp} from '@navigation/types';
+import {useResetPasswordMutation} from '@api/authApi';
+import {ResetPasswordScreenNavigationProp} from '@navigation/types';
 
 // Utils & Theme
 import {spacing} from '@theme/spacing';
 import {formatErrorMessage} from '@utils/errorHandler';
 import {responsiveFontSize, useResponsiveDimensions} from '@utils/responsive';
 import {getContainerPadding, getFormWidth} from '@utils/responsiveLayout';
-import {useTheme} from 'react-native-paper';
+import {useTheme} from '@theme/useTheme';
 
 interface Props {
-  navigation: ForgotPasswordScreenNavigationProp;
+  navigation: ResetPasswordScreenNavigationProp;
 }
 
 interface FormData {
-  email: string;
+  code: string;
+  password: string;
+  passwordConfirmation: string;
 }
 
 const schema = yup.object().shape({
-  email: yup
+  code: yup.string().required('Reset code is required'),
+  password: yup
     .string()
-    .email('Please enter a valid email')
-    .required('Email is required'),
+    .min(8, 'Password must be at least 8 characters')
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      'Password must contain at least one uppercase letter, one lowercase letter, and one number',
+    )
+    .required('Password is required'),
+  passwordConfirmation: yup
+    .string()
+    .oneOf([yup.ref('password')], 'Passwords must match')
+    .required('Password confirmation is required'),
 });
 
-const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
+const ResetPasswordScreen: React.FC<Props> = ({navigation}) => {
   const theme = useTheme();
   const {deviceType, isPortrait} = useResponsiveDimensions();
-  const [forgotPassword] = useForgotPasswordMutation();
+  const [resetPassword] = useResetPasswordMutation();
   const [snackbarData, setSnackbarData] = useState<{
     message: string;
     type: 'error' | 'success';
@@ -59,14 +70,14 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      await forgotPassword(data).unwrap();
+      await resetPassword(data).unwrap();
       setSnackbarData({
-        message: 'Password reset instructions sent to your email',
+        message: 'Password reset successful',
         type: 'success',
         visible: true,
       });
-      // Navigate to ResetPassword screen after successful email send
-      navigation.navigate('ResetPassword');
+      // Navigate to Login screen after successful password reset
+      navigation.navigate('Login');
     } catch (error: any) {
       setSnackbarData({
         message: formatErrorMessage(error.error.data),
@@ -86,22 +97,37 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
             text: 'Shatrends',
             size: 32
           }}
-          title="Forgot Password"
-          subtitle="Enter your email address and we'll send you instructions to reset your password."
+          title="Reset Password"
+          subtitle="Enter the code from your email and create a new password."
         />
 
         <View style={styles.formContainer}>
           <ShaTextInput
-            name="email"
-            icon="email"
+            name="code"
             control={control}
-            placeholder="Enter Your Email"
-            error={errors.email?.message}
-            keyboardType="email-address"
+            label="Reset Code"
+            error={errors.code?.message}
+            autoCapitalize="none"
+          />
+
+          <ShaTextInput
+            name="password"
+            control={control}
+            label="New Password"
+            error={errors.password?.message}
+            secureTextEntry
+          />
+
+          <ShaTextInput
+            name="passwordConfirmation"
+            control={control}
+            label="Confirm New Password"
+            error={errors.passwordConfirmation?.message}
+            secureTextEntry
           />
 
           <ShaPrimaryButton
-            label="Send Reset Instructions"
+            label="Reset Password"
             onPress={handleSubmit(onSubmit)}
             style={styles.submitButton}
           />
@@ -110,12 +136,12 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
 
       <ShaSnackbar
         visible={snackbarData.visible}
-        message={snackbarData.message}
         onDismiss={() =>
           setSnackbarData(prev => ({...prev, visible: false}))
         }
-        type={snackbarData.type}
-      />
+        type={snackbarData.type}>
+        {snackbarData.message}
+      </ShaSnackbar>
     </ShaAuthLayout>
   );
 };
@@ -133,4 +159,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ForgotPasswordScreen;
+export default ResetPasswordScreen;

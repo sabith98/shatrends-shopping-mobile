@@ -3,18 +3,23 @@ import {Text, View, StyleSheet, TouchableOpacity} from 'react-native';
 import {useForm} from 'react-hook-form';
 import {yupResolver} from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
+// Components
 import {ShaAuthLayout} from '@layouts';
 import {ShaAuthFooter, ShaAuthHeader, ShaSocialButton} from '@components/auth';
 import {ShaPrimaryButton, ShaSnackbar, ShaTextInput} from '@components/common';
+
+// API & Types
 import {useSignUpMutation} from '@api';
-import {
-  responsiveFontSize,
-  spacing,
-  useResponsiveDimensions,
-} from '@utils/responsive';
+import {RootStackParamList} from '@navigation/types';
+
+// Utils & Theme
 import {theme} from '@/theme';
+import {spacing} from '@theme/spacing';
 import {formatErrorMessage} from '@utils/errorHandler';
+import {responsiveFontSize, useResponsiveDimensions} from '@utils/responsive';
+import {getContainerPadding, getFormWidth} from '@utils/responsiveLayout';
 
 // Form validation schema
 const schema = yup.object().shape({
@@ -47,7 +52,13 @@ interface FormData {
   password: string;
 }
 
-const SignUpScreen: React.FC<{navigation: any}> = ({navigation}) => {
+type SignUpScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'SignUp'>;
+
+interface Props {
+  navigation: SignUpScreenNavigationProp;
+}
+
+const SignUpScreen: React.FC<Props> = ({navigation}) => {
   // State and hooks setup
   const [showPassword, setShowPassword] = useState(false);
   const [signUp, {isLoading}] = useSignUpMutation();
@@ -105,32 +116,10 @@ const SignUpScreen: React.FC<{navigation: any}> = ({navigation}) => {
     }
   };
 
-  const getContainerPadding = () => {
-    switch (deviceType) {
-      case 'tablet':
-        return {paddingHorizontal: spacing.xl};
-      case 'desktop':
-        return {paddingHorizontal: spacing.xxl};
-      default:
-        return {paddingHorizontal: spacing.md};
-    }
-  };
-
-  const getFormWidth = () => {
-    switch (deviceType) {
-      case 'tablet':
-        return isPortrait ? '80%' : '60%';
-      case 'desktop':
-        return '40%';
-      default:
-        return '100%';
-    }
-  };
-
   return (
     <ShaAuthLayout
-      containerPadding={getContainerPadding()}
-      formWidth={getFormWidth()}>
+      containerPadding={getContainerPadding(deviceType)}
+      formWidth={getFormWidth(deviceType, isPortrait)}>
       <ShaAuthHeader
         logo={{
           text: 'Shatrends',
@@ -202,11 +191,12 @@ const SignUpScreen: React.FC<{navigation: any}> = ({navigation}) => {
       />
 
       <ShaSnackbar
-        visible={snackbarData.visible}
         message={snackbarData.message}
         type={snackbarData.type}
+        visible={snackbarData.visible}
         onDismiss={() => setSnackbarData(prev => ({...prev, visible: false}))}
-      />
+      >
+      </ShaSnackbar>
     </ShaAuthLayout>
   );
 };

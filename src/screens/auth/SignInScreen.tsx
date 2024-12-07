@@ -3,18 +3,23 @@ import {Text, View, StyleSheet, TouchableOpacity} from 'react-native';
 import {useForm} from 'react-hook-form';
 import {yupResolver} from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
+// Components
 import {ShaAuthLayout} from '@layouts';
 import {ShaAuthFooter, ShaAuthHeader, ShaSocialButton} from '@components/auth';
 import {ShaPrimaryButton, ShaSnackbar, ShaTextInput} from '@components/common';
+
+// API & Types
 import {useSignInMutation} from '@api';
-import {
-  responsiveFontSize,
-  spacing,
-  useResponsiveDimensions,
-} from '@utils/responsive';
+import {RootStackParamList} from '@navigation/types';
+
+// Utils & Theme
 import {theme} from '@/theme';
+import {spacing} from '@theme/spacing';
 import {formatErrorMessage} from '@utils/errorHandler';
+import {responsiveFontSize, useResponsiveDimensions} from '@utils/responsive';
+import {getContainerPadding, getFormWidth} from '@utils/responsiveLayout';
 
 // Form validation schema
 const schema = yup.object().shape({
@@ -41,7 +46,13 @@ interface FormData {
   password: string;
 }
 
-const SignInScreen: React.FC<{navigation: any}> = ({navigation}) => {
+type SignInScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'SignIn'>;
+
+interface Props {
+  navigation: SignInScreenNavigationProp;
+}
+
+const SignInScreen: React.FC<Props> = ({navigation}) => {
   // State and hooks setup
   const [showPassword, setShowPassword] = useState(false);
   const [signIn, {isLoading}] = useSignInMutation();
@@ -57,7 +68,7 @@ const SignInScreen: React.FC<{navigation: any}> = ({navigation}) => {
     control,
     handleSubmit,
     formState: {errors},
-  } = useForm({
+  } = useForm<FormData>({
     resolver: yupResolver(schema),
   });
 
@@ -86,39 +97,24 @@ const SignInScreen: React.FC<{navigation: any}> = ({navigation}) => {
    */
   const handleSocialAuth = async (provider: string) => {
     try {
-      // TODO: Implement social auth logic
-      console.log(`${provider} sign in attempted`);
-    } catch (error) {
-      console.error(`${provider} sign in error:`, error);
-    }
-  };
-
-  const getContainerPadding = () => {
-    switch (deviceType) {
-      case 'tablet':
-        return {paddingHorizontal: spacing.xl};
-      case 'desktop':
-        return {paddingHorizontal: spacing.xxl};
-      default:
-        return {paddingHorizontal: spacing.md};
-    }
-  };
-
-  const getFormWidth = () => {
-    switch (deviceType) {
-      case 'tablet':
-        return isPortrait ? '80%' : '60%';
-      case 'desktop':
-        return '40%';
-      default:
-        return '100%';
+      setSnackbarData({
+        message: `${provider} authentication is not yet available`,
+        type: 'info',
+        visible: true,
+      });
+    } catch (error: any) {
+      setSnackbarData({
+        message: formatErrorMessage(error.error.data),
+        type: 'error',
+        visible: true,
+      });
     }
   };
 
   return (
     <ShaAuthLayout
-      containerPadding={getContainerPadding()}
-      formWidth={getFormWidth()}>
+      containerPadding={getContainerPadding(deviceType)}
+      formWidth={getFormWidth(deviceType, isPortrait)}>
       <ShaAuthHeader
         logo={{
           // Uncomment and use image when available
@@ -202,8 +198,8 @@ const SignInScreen: React.FC<{navigation: any}> = ({navigation}) => {
         message={snackbarData.message}
         type={snackbarData.type}
         visible={snackbarData.visible}
-        onDismiss={() => setSnackbarData(prev => ({...prev, visible: false}))}
-      />
+        onDismiss={() => setSnackbarData(prev => ({...prev, visible: false}))}>
+      </ShaSnackbar>
     </ShaAuthLayout>
   );
 };

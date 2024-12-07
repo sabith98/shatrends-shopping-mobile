@@ -6,6 +6,7 @@ export type RootStackParamList = {
   Signup: undefined;
   Home: undefined;
   ForgotPassword: undefined;
+  ResetPassword: undefined;
   OTP: undefined;
 };
 
@@ -25,6 +26,10 @@ export type HomeScreenNavigationProp = NativeStackNavigationProp<
 export type ForgotPasswordScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'ForgotPassword'
+>;
+export type ResetPasswordScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'ResetPassword'
 >;
 export type OTPScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,

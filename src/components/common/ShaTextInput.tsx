@@ -8,7 +8,7 @@ import {spacing, responsiveFontSize, moderateScale} from '@utils/responsive';
 interface ShaTextInputProps {
   name: string;
   control: Control<any>;
-  icon: string;
+  icon?: string;
   placeholder: string;
   secureTextEntry?: boolean;
   rightIcon?: {
