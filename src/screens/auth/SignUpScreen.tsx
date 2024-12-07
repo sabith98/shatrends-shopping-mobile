@@ -14,6 +14,7 @@ import {
   useResponsiveDimensions,
 } from '@utils/responsive';
 import {theme} from '@/theme';
+import {formatErrorMessage} from '@utils/errorHandler';
 
 // Form validation schema
 const schema = yup.object().shape({
@@ -66,23 +67,18 @@ const SignUpScreen: React.FC<{navigation: any}> = ({navigation}) => {
     resolver: yupResolver(schema),
   });
 
-  /**
-   * Handles the sign-up form submission
-   * Attempts to register user and handles success/error cases
-   */
+  // Handles the sign-up form submission
   const onSubmit = async (data: FormData) => {
     try {
       await signUp(data).unwrap();
       setSnackbarData({
-        message: 'Sign up successful!',
+        message: 'Sign up successful! Please check your email to verify your account.',
         type: 'success',
         visible: true,
       });
-      navigation.navigate('Login');
-    } catch (error) {
-      console.error('Sign up error:', error);
+    } catch (error: any) {
       setSnackbarData({
-        message: 'Sign up failed. Please try again.',
+        message: formatErrorMessage(error.error.data),
         type: 'error',
         visible: true,
       });
@@ -95,10 +91,17 @@ const SignUpScreen: React.FC<{navigation: any}> = ({navigation}) => {
    */
   const handleSocialAuth = async (provider: string) => {
     try {
-      // TODO: Implement social auth logic
-      console.log(`${provider} sign up attempted`);
-    } catch (error) {
-      console.error(`${provider} sign up error:`, error);
+      setSnackbarData({
+        message: `${provider} authentication is not yet available`,
+        type: 'info',
+        visible: true,
+      });
+    } catch (error: any) {
+      setSnackbarData({
+        message: formatErrorMessage(error.error.data),
+        type: 'error',
+        visible: true,
+      });
     }
   };
 
@@ -168,8 +171,9 @@ const SignUpScreen: React.FC<{navigation: any}> = ({navigation}) => {
         />
 
         <ShaPrimaryButton
-          label="Sign Up"
+          label="Create Account"
           onPress={handleSubmit(onSubmit)}
+          disabled={isLoading}
           loading={isLoading}
           style={styles.signUpButton}
         />
@@ -194,7 +198,7 @@ const SignUpScreen: React.FC<{navigation: any}> = ({navigation}) => {
       <ShaAuthFooter
         message="Already have an account?"
         linkText="Sign In"
-        onLinkPress={() => navigation.navigate('Login')}
+        onLinkPress={() => navigation.navigate('SignIn')}
       />
 
       <ShaSnackbar

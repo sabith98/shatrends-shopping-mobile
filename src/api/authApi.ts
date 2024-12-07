@@ -2,15 +2,15 @@
  * Authentication API endpoints implementation
  * Handles user authentication operations including login, registration,
  * user reset password, profile fetch, and logout functionality
- * TODO: reset password
  */
 
-import {baseApi} from './baseApi';
+import {baseApi, baseQueryWithErrorHandler} from './baseApi';
 import type {StrapiAuthResponse, StrapiUser} from '@/types/auth.types';
 import {storage} from '@services/storage';
 import {STORAGE_KEYS} from '@constants/storage';
 import {API_CONFIG} from '@constants/config';
 import {setUser, clearAuth} from '@store/slices/authSlice';
+import {formatErrorMessage} from '@utils/errorHandler';
 
 // Type definitions for authentication payloads
 interface SignInCredentials {
@@ -41,10 +41,9 @@ export const authApi = baseApi.injectEndpoints({
           const {data} = await queryFulfilled;
           await storage.setItem(STORAGE_KEYS.AUTH_TOKEN, data.jwt); // Store JWT token
           dispatch(setUser(data.user));
-        } catch (error) {
-          // TODO: Implement a centralized error handling utility
-          console.error('An error occurred during login');
+        } catch (error: any) {
           dispatch(clearAuth()); // Clear authentication state on error
+          throw new Error(formatErrorMessage(error.error.data));
         }
       },
     }),
@@ -64,9 +63,9 @@ export const authApi = baseApi.injectEndpoints({
           const {data} = await queryFulfilled;
           await storage.setItem(STORAGE_KEYS.AUTH_TOKEN, data.jwt);
           dispatch(setUser(data.user));
-        } catch (error) {
-          console.error('An error occurred during register');
+        } catch (error: any) {
           dispatch(clearAuth());
+          throw new Error(formatErrorMessage(error.error.data));
         }
       },
     }),
@@ -83,10 +82,10 @@ export const authApi = baseApi.injectEndpoints({
         try {
           const {data} = await queryFulfilled;
           dispatch(setUser(data));
-        } catch (error) {
-          console.error('Get user error:', error);
+        } catch (error: any) {
           dispatch(clearAuth());
           await storage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+          throw new Error(formatErrorMessage(error.error.data));
         }
       },
     }),

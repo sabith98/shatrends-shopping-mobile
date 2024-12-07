@@ -1,15 +1,3 @@
-/**
- * SignInScreen Component
- *
- * Handles user authentication through email/username + password
- * and social authentication methods.
- *
- * Features:
- * - Form validation with yup
- * - Social authentication options
- * - Responsive layout
- * - Error handling with snackbar notifications
- */
 import React, {useState} from 'react';
 import {Text, View, StyleSheet, TouchableOpacity} from 'react-native';
 import {useForm} from 'react-hook-form';
@@ -26,6 +14,7 @@ import {
   useResponsiveDimensions,
 } from '@utils/responsive';
 import {theme} from '@/theme';
+import {formatErrorMessage} from '@utils/errorHandler';
 
 // Form validation schema
 const schema = yup.object().shape({
@@ -36,7 +25,6 @@ const schema = yup.object().shape({
       'email-or-username',
       'Please enter a valid email or username',
       value => {
-        // TODO: Consider moving these regex patterns to a constants file
         const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
         const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
         return emailRegex.test(value) || usernameRegex.test(value);
@@ -44,7 +32,7 @@ const schema = yup.object().shape({
     ),
   password: yup
     .string()
-    .min(6, 'Password must be at least 6 characters long')
+    .min(8, 'Password must be at least 8 characters long')
     .required('Password is required'),
 });
 
@@ -73,26 +61,19 @@ const SignInScreen: React.FC<{navigation: any}> = ({navigation}) => {
     resolver: yupResolver(schema),
   });
 
-  /**
-   * Handles the sign-in form submission
-   * Attempts to authenticate user and handles success/error cases
-   */
+  // Handles the sign-in form submission
   const onSubmit = async (data: FormData) => {
     try {
       await signIn(data).unwrap();
-      // Show success message
       setSnackbarData({
         message: 'Sign in successful!',
         type: 'success',
         visible: true,
       });
       navigation.navigate('Home');
-    } catch (error) {
-      // TODO: Add proper error handling based on error types
-      console.error('Sign in error:', error);
-      // Show error message
+    } catch (error: any) {
       setSnackbarData({
-        message: 'Sign in error. Please check your credentials.',
+        message: formatErrorMessage(error.error.data),
         type: 'error',
         visible: true,
       });
@@ -189,6 +170,7 @@ const SignInScreen: React.FC<{navigation: any}> = ({navigation}) => {
         <ShaPrimaryButton
           label="Sign In"
           onPress={handleSubmit(onSubmit)}
+          disabled={isLoading}
           loading={isLoading}
           style={styles.signInButton}
         />
