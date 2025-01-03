@@ -6,15 +6,18 @@ import {theme} from './src/theme';
 import {PaperProvider} from 'react-native-paper';
 import {Provider} from 'react-redux';
 import {store} from './src/store/store';
+import {ToastProvider} from './src/hooks';
 
 export default function App() {
   return (
     <Provider store={store}>
       <PaperProvider theme={theme}>
         <SafeAreaProvider>
-          <SafeAreaView style={styles.flexOne}>
-            <AppNavigator />
-          </SafeAreaView>
+          <ToastProvider>
+            <SafeAreaView style={styles.flexOne}>
+              <AppNavigator />
+            </SafeAreaView>
+          </ToastProvider>
         </SafeAreaProvider>
       </PaperProvider>
     </Provider>

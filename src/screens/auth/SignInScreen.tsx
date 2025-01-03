@@ -8,18 +8,19 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 // Components
 import {ShaAuthLayout} from '@layouts';
 import {ShaAuthFooter, ShaAuthHeader, ShaSocialButton} from '@components/auth';
-import {ShaPrimaryButton, ShaSnackbar, ShaTextInput} from '@components/common';
+import {ShaPrimaryButton, ShaTextInput} from '@components/common';
 
 // API & Types
 import {useSignInMutation} from '@api';
 import {RootStackParamList} from '@navigation/types';
 
 // Utils & Theme
-import {theme} from '@/theme';
+import {theme} from '@theme';
 import {spacing} from '@theme/spacing';
 import {formatErrorMessage} from '@utils/errorHandler';
 import {responsiveFontSize, useResponsiveDimensions} from '@utils/responsive';
 import {getContainerPadding, getFormWidth} from '@utils/responsiveLayout';
+import {useToast} from '@hooks/useToast';
 
 // Form validation schema
 const schema = yup.object().shape({
@@ -57,11 +58,7 @@ const SignInScreen: React.FC<Props> = ({navigation}) => {
   const [showPassword, setShowPassword] = useState(false);
   const [signIn, {isLoading}] = useSignInMutation();
   const {deviceType, isPortrait} = useResponsiveDimensions();
-  const [snackbarData, setSnackbarData] = useState({
-    message: '',
-    type: 'info' as 'success' | 'error' | 'info' | 'warning',
-    visible: false,
-  });
+  const {showToast} = useToast();
 
   // Form handling setup
   const {
@@ -76,18 +73,10 @@ const SignInScreen: React.FC<Props> = ({navigation}) => {
   const onSubmit = async (data: FormData) => {
     try {
       await signIn(data).unwrap();
-      setSnackbarData({
-        message: 'Sign in successful!',
-        type: 'success',
-        visible: true,
-      });
+      showToast('Sign in successful!', 'success');
       navigation.navigate('Home');
     } catch (error: any) {
-      setSnackbarData({
-        message: formatErrorMessage(error.error.data),
-        type: 'error',
-        visible: true,
-      });
+      showToast(formatErrorMessage(error.error.data), 'error');
     }
   };
 
@@ -97,17 +86,9 @@ const SignInScreen: React.FC<Props> = ({navigation}) => {
    */
   const handleSocialAuth = async (provider: string) => {
     try {
-      setSnackbarData({
-        message: `${provider} authentication is not yet available`,
-        type: 'info',
-        visible: true,
-      });
+      showToast(`${provider} authentication is not yet available`, 'info');
     } catch (error: any) {
-      setSnackbarData({
-        message: formatErrorMessage(error.error.data),
-        type: 'error',
-        visible: true,
-      });
+      showToast(formatErrorMessage(error.error.data), 'error');
     }
   };
 
@@ -173,6 +154,7 @@ const SignInScreen: React.FC<Props> = ({navigation}) => {
       </View>
 
       <View style={styles.socialContainer}>
+        <Text style={styles.orText}>Or sign in with</Text>
         <View style={styles.socialButtonsRow}>
           <ShaSocialButton
             provider="google"
@@ -190,16 +172,8 @@ const SignInScreen: React.FC<Props> = ({navigation}) => {
       <ShaAuthFooter
         message="Don't have an account?"
         linkText="Sign up"
-        onLinkPress={() => navigation.navigate('Signup')}
+        onLinkPress={() => navigation.navigate('SignUp')}
       />
-
-      {/* AppSnackbar component to display notifications */}
-      <ShaSnackbar
-        message={snackbarData.message}
-        type={snackbarData.type}
-        visible={snackbarData.visible}
-        onDismiss={() => setSnackbarData(prev => ({...prev, visible: false}))}>
-      </ShaSnackbar>
     </ShaAuthLayout>
   );
 };
@@ -212,6 +186,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   socialContainer: {
+    alignItems: 'center',
     marginTop: spacing.xl,
   },
   socialButtonsRow: {
@@ -227,6 +202,11 @@ const styles = StyleSheet.create({
   },
   forgotPassword: {
     fontWeight: '500',
+  },
+  orText: {
+    fontSize: responsiveFontSize(14),
+    color: theme.colors.onSurfaceVariant,
+    marginBottom: spacing.md,
   },
 });
 

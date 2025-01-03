@@ -7,6 +7,7 @@ import React from 'react';
 import {ActivityIndicator, View} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {RootStackParamList} from './types';
 import {useShaAuth} from '@hooks';
 import {
   SignInScreen,
@@ -16,7 +17,7 @@ import {
   HomeScreen,
 } from '@screens';
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
   const {isAuthenticated, isLoading} = useShaAuth();
@@ -38,8 +39,8 @@ const AppNavigator = () => {
         {!isAuthenticated ? (
           // Auth Stack
           <Stack.Group screenOptions={{headerShown: false}}>
-            <Stack.Screen name="Login" component={SignInScreen} />
-            <Stack.Screen name="Signup" component={SignUpScreen} />
+            <Stack.Screen name="SignIn" component={SignInScreen} />
+            <Stack.Screen name="SignUp" component={SignUpScreen} />
             <Stack.Screen
               name="ForgotPassword"
               component={ForgotPasswordScreen}

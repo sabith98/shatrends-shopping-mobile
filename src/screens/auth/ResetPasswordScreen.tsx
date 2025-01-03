@@ -7,7 +7,7 @@ import * as yup from 'yup';
 // Components
 import {ShaAuthLayout} from '@layouts';
 import {ShaAuthHeader} from '@components/auth';
-import {ShaPrimaryButton, ShaSnackbar, ShaTextInput} from '@components/common';
+import {ShaPrimaryButton, ShaTextInput} from '@components/common';
 
 // API & Types
 import {useResetPasswordMutation} from '@api/authApi';
@@ -18,7 +18,8 @@ import {spacing} from '@theme/spacing';
 import {formatErrorMessage} from '@utils/errorHandler';
 import {responsiveFontSize, useResponsiveDimensions} from '@utils/responsive';
 import {getContainerPadding, getFormWidth} from '@utils/responsiveLayout';
-import {useTheme} from '@theme/useTheme';
+import {theme} from '@theme';
+import {useToast} from '@hooks/useToast';
 
 interface Props {
   navigation: ResetPasswordScreenNavigationProp;
@@ -47,18 +48,9 @@ const schema = yup.object().shape({
 });
 
 const ResetPasswordScreen: React.FC<Props> = ({navigation}) => {
-  const theme = useTheme();
   const {deviceType, isPortrait} = useResponsiveDimensions();
   const [resetPassword] = useResetPasswordMutation();
-  const [snackbarData, setSnackbarData] = useState<{
-    message: string;
-    type: 'error' | 'success';
-    visible: boolean;
-  }>({
-    message: '',
-    type: 'error',
-    visible: false,
-  });
+  const {showToast} = useToast();
 
   const {
     control,
@@ -71,19 +63,11 @@ const ResetPasswordScreen: React.FC<Props> = ({navigation}) => {
   const onSubmit = async (data: FormData) => {
     try {
       await resetPassword(data).unwrap();
-      setSnackbarData({
-        message: 'Password reset successful',
-        type: 'success',
-        visible: true,
-      });
-      // Navigate to Login screen after successful password reset
-      navigation.navigate('Login');
+      showToast('Password reset successful', 'success');
+      // Navigate to SignIn screen after successful password reset
+      navigation.navigate('SignIn');
     } catch (error: any) {
-      setSnackbarData({
-        message: formatErrorMessage(error.error.data),
-        type: 'error',
-        visible: true,
-      });
+      showToast(formatErrorMessage(error.error.data), 'error');
     }
   };
 
@@ -95,7 +79,7 @@ const ResetPasswordScreen: React.FC<Props> = ({navigation}) => {
         <ShaAuthHeader
           logo={{
             text: 'Shatrends',
-            size: 32
+            size: 32,
           }}
           title="Reset Password"
           subtitle="Enter the code from your email and create a new password."
@@ -105,15 +89,14 @@ const ResetPasswordScreen: React.FC<Props> = ({navigation}) => {
           <ShaTextInput
             name="code"
             control={control}
-            label="Reset Code"
+            placeholder="Reset Code"
             error={errors.code?.message}
-            autoCapitalize="none"
           />
 
           <ShaTextInput
             name="password"
             control={control}
-            label="New Password"
+            placeholder="New Password"
             error={errors.password?.message}
             secureTextEntry
           />
@@ -121,7 +104,7 @@ const ResetPasswordScreen: React.FC<Props> = ({navigation}) => {
           <ShaTextInput
             name="passwordConfirmation"
             control={control}
-            label="Confirm New Password"
+            placeholder="Confirm New Password"
             error={errors.passwordConfirmation?.message}
             secureTextEntry
           />
@@ -133,15 +116,6 @@ const ResetPasswordScreen: React.FC<Props> = ({navigation}) => {
           />
         </View>
       </View>
-
-      <ShaSnackbar
-        visible={snackbarData.visible}
-        onDismiss={() =>
-          setSnackbarData(prev => ({...prev, visible: false}))
-        }
-        type={snackbarData.type}>
-        {snackbarData.message}
-      </ShaSnackbar>
     </ShaAuthLayout>
   );
 };

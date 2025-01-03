@@ -8,7 +8,7 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 // Components
 import {ShaAuthLayout} from '@layouts';
 import {ShaAuthFooter, ShaAuthHeader, ShaSocialButton} from '@components/auth';
-import {ShaPrimaryButton, ShaSnackbar, ShaTextInput} from '@components/common';
+import {ShaPrimaryButton, ShaTextInput} from '@components/common';
 
 // API & Types
 import {useSignUpMutation} from '@api';
@@ -63,11 +63,10 @@ const SignUpScreen: React.FC<Props> = ({navigation}) => {
   const [showPassword, setShowPassword] = useState(false);
   const [signUp, {isLoading}] = useSignUpMutation();
   const {deviceType, isPortrait} = useResponsiveDimensions();
-  const [snackbarData, setSnackbarData] = useState({
-    message: '',
-    type: 'info' as 'success' | 'error' | 'info' | 'warning',
-    visible: false,
-  });
+
+  const showSuccess = useSuccessToast();
+  const showError = useErrorToast();
+  const showInfo = useInfoToast();
 
   // Form handling setup
   const {
@@ -82,17 +81,9 @@ const SignUpScreen: React.FC<Props> = ({navigation}) => {
   const onSubmit = async (data: FormData) => {
     try {
       await signUp(data).unwrap();
-      setSnackbarData({
-        message: 'Sign up successful! Please check your email to verify your account.',
-        type: 'success',
-        visible: true,
-      });
+      showSuccess('Sign up successful! Please check your email to verify your account.');
     } catch (error: any) {
-      setSnackbarData({
-        message: formatErrorMessage(error.error.data),
-        type: 'error',
-        visible: true,
-      });
+      showError(formatErrorMessage(error.error.data));
     }
   };
 
@@ -102,17 +93,9 @@ const SignUpScreen: React.FC<Props> = ({navigation}) => {
    */
   const handleSocialAuth = async (provider: string) => {
     try {
-      setSnackbarData({
-        message: `${provider} authentication is not yet available`,
-        type: 'info',
-        visible: true,
-      });
+      showInfo(`${provider} authentication is not yet available`);
     } catch (error: any) {
-      setSnackbarData({
-        message: formatErrorMessage(error.error.data),
-        type: 'error',
-        visible: true,
-      });
+      showError(formatErrorMessage(error.error.data));
     }
   };
 
@@ -189,14 +172,6 @@ const SignUpScreen: React.FC<Props> = ({navigation}) => {
         linkText="Sign In"
         onLinkPress={() => navigation.navigate('SignIn')}
       />
-
-      <ShaSnackbar
-        message={snackbarData.message}
-        type={snackbarData.type}
-        visible={snackbarData.visible}
-        onDismiss={() => setSnackbarData(prev => ({...prev, visible: false}))}
-      >
-      </ShaSnackbar>
     </ShaAuthLayout>
   );
 };
@@ -238,5 +213,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
 });
+
+import {useSuccessToast, useErrorToast, useInfoToast} from '@hooks/useToast';
 
 export default SignUpScreen;

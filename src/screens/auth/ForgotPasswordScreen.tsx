@@ -7,7 +7,7 @@ import * as yup from 'yup';
 // Components
 import {ShaAuthLayout} from '@layouts';
 import {ShaAuthHeader} from '@components/auth';
-import {ShaPrimaryButton, ShaSnackbar, ShaTextInput} from '@components/common';
+import {ShaPrimaryButton, ShaTextInput} from '@components/common';
 
 // API & Types
 import {useForgotPasswordMutation} from '@api/authApi';
@@ -19,6 +19,7 @@ import {formatErrorMessage} from '@utils/errorHandler';
 import {responsiveFontSize, useResponsiveDimensions} from '@utils/responsive';
 import {getContainerPadding, getFormWidth} from '@utils/responsiveLayout';
 import {useTheme} from 'react-native-paper';
+import {useToast} from '@hooks/useToast';
 
 interface Props {
   navigation: ForgotPasswordScreenNavigationProp;
@@ -39,15 +40,7 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
   const theme = useTheme();
   const {deviceType, isPortrait} = useResponsiveDimensions();
   const [forgotPassword] = useForgotPasswordMutation();
-  const [snackbarData, setSnackbarData] = useState<{
-    message: string;
-    type: 'error' | 'success';
-    visible: boolean;
-  }>({
-    message: '',
-    type: 'error',
-    visible: false,
-  });
+  const {showToast} = useToast();
 
   const {
     control,
@@ -60,19 +53,11 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
   const onSubmit = async (data: FormData) => {
     try {
       await forgotPassword(data).unwrap();
-      setSnackbarData({
-        message: 'Password reset instructions sent to your email',
-        type: 'success',
-        visible: true,
-      });
+      showToast('Password reset instructions sent to your email', 'success');
       // Navigate to ResetPassword screen after successful email send
-      navigation.navigate('ResetPassword');
+      navigation.navigate('OTP', { email: data.email });
     } catch (error: any) {
-      setSnackbarData({
-        message: formatErrorMessage(error.error.data),
-        type: 'error',
-        visible: true,
-      });
+      showToast(formatErrorMessage(error.error.data), 'error');
     }
   };
 
@@ -107,15 +92,6 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
           />
         </View>
       </View>
-
-      <ShaSnackbar
-        visible={snackbarData.visible}
-        message={snackbarData.message}
-        onDismiss={() =>
-          setSnackbarData(prev => ({...prev, visible: false}))
-        }
-        type={snackbarData.type}
-      />
     </ShaAuthLayout>
   );
 };
