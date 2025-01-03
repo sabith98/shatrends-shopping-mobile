@@ -4,6 +4,7 @@ export const API_CONFIG = {
     signIn: '/auth/local',
     signUp: '/auth/local/register',
     forgotPassword: '/auth/forgot-password',
+    verifyOTP: '/auth/verify-otp',
     resetPassword: '/auth/reset-password',
     me: '/users/me',
   },

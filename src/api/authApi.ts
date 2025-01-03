@@ -26,10 +26,6 @@ interface SignUpCredentials {
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: builder => ({
-    /**
-     * Sign In Mutation
-     * Authenticates user and stores JWT token
-     */
     signIn: builder.mutation<StrapiAuthResponse, SignInCredentials>({
       query: credentials => ({
         url: API_CONFIG.auth.signIn,
@@ -42,16 +38,12 @@ export const authApi = baseApi.injectEndpoints({
           await storage.setItem(STORAGE_KEYS.AUTH_TOKEN, data.jwt); // Store JWT token
           dispatch(setUser(data.user));
         } catch (error: any) {
-          dispatch(clearAuth()); // Clear authentication state on error
+          dispatch(clearAuth());
           throw new Error(formatErrorMessage(error.error.data));
         }
       },
     }),
 
-    /**
-     * Sign Up Mutation
-     * Registers new user and handles initial authentication
-     */
     signUp: builder.mutation<StrapiAuthResponse, SignUpCredentials>({
       query: userData => ({
         url: API_CONFIG.auth.signUp,
@@ -70,11 +62,6 @@ export const authApi = baseApi.injectEndpoints({
       },
     }),
 
-    /**
-     * Get Me Query
-     * Fetches current user profile data
-     * Used for token validation and profile updates
-     */
     getMe: builder.query<StrapiUser, void>({
       query: () => API_CONFIG.auth.me,
       providesTags: ['User'],
@@ -90,10 +77,6 @@ export const authApi = baseApi.injectEndpoints({
       },
     }),
 
-    /**
-     * Logout Mutation
-     * Handles user logout by clearing token and auth state
-     */
     logout: builder.mutation<{success: boolean}, void>({
       queryFn: async () => {
         try {
@@ -114,10 +97,6 @@ export const authApi = baseApi.injectEndpoints({
       },
     }),
 
-    /**
-     * Forgot Password Mutation
-     * Sends password reset email to user
-     */
     forgotPassword: builder.mutation<{ok: boolean}, {email: string}>({
       query: credentials => ({
         url: API_CONFIG.auth.forgotPassword,
@@ -133,10 +112,6 @@ export const authApi = baseApi.injectEndpoints({
       },
     }),
 
-    /**
-     * Reset Password Mutation
-     * Resets user password using code from email
-     */
     resetPassword: builder.mutation<
       StrapiAuthResponse,
       {code: string; password: string; passwordConfirmation: string}
@@ -152,7 +127,24 @@ export const authApi = baseApi.injectEndpoints({
           await storage.setItem(STORAGE_KEYS.AUTH_TOKEN, data.jwt);
           dispatch(setUser(data.user));
         } catch (error: any) {
-          dispatch(clearAuth());
+          throw new Error(formatErrorMessage(error.error.data));
+        }
+      },
+    }),
+
+    verifyOTP: builder.mutation<
+      {success: boolean; message: string},
+      {email: string; otp: string}
+    >({
+      query: credentials => ({
+        url: API_CONFIG.auth.verifyOTP,
+        method: 'POST',
+        body: credentials,
+      }),
+      async onQueryStarted(_, {queryFulfilled}) {
+        try {
+          await queryFulfilled;
+        } catch (error: any) {
           throw new Error(formatErrorMessage(error.error.data));
         }
       },
@@ -167,4 +159,5 @@ export const {
   useLogoutMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,
+  useVerifyOTPMutation,
 } = authApi;
